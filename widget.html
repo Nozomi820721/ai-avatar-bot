@@ -82,6 +82,10 @@
     <div id="suggestions"></div>
     <div id="control-bar" role="toolbar" aria-label="虛擬人控制列">
       <button class="ctrl primary" id="btn-mic"   aria-label="開始語音對話"><span aria-hidden="true">🎤</span> 說話</button>
+      <div id="text-input-container" style="position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; gap: 5px;">
+    <input type="text" id="user-text-input" placeholder="對我說點什麼吧..." style="flex: 1; padding: 8px; border-radius: 20px; border: 1px solid #ccc; outline: none;">
+    <button id="send-text-btn" style="padding: 8px 15px; border-radius: 20px; background-color: #6c5ce7; color: white; border: none; cursor: pointer;">傳送</button>
+</div>
       <button class="ctrl" id="btn-llm"   aria-label="啟用瀏覽器內 AI 大腦（首次需下載模型）" aria-pressed="false"><span aria-hidden="true">🧠</span></button>
       <button class="ctrl" id="btn-mute"  aria-label="靜音" aria-pressed="false"><span aria-hidden="true">🔊</span></button>
       <button class="ctrl" id="btn-speed" aria-label="調整語速">1.0×</button>
@@ -479,6 +483,32 @@
       speak('AI 大腦啟用完成，現在我可以聊得更自然囉！');
     } catch (e) { btn.textContent = '🧠✗'; showBubble('AI 大腦載入失敗：' + (e && e.message || e)); }
   };
+  // 1. 抓到我們剛才做好的輸入框和按鈕
+const textInput = document.getElementById('user-text-input');
+const sendBtn = document.getElementById('send-text-btn');
+
+// 2. 定義「把文字送給 AI」的動作
+function handleTextSubmit() {
+    const text = textInput.value.trim(); // 取得輸入框裡的文字，並去掉前後空白
+    
+    if (text !== "") { 
+        // 這裡調用專案原本處理文字問答的函式（假設專案原本處理文字問答的 function 叫做 askAI）
+        // 它會讓 AI 開始思考、回答，並觸發 Live2D 說話與對嘴
+        askAI(text); 
+        
+        textInput.value = ""; // 傳送成功後，把輸入框清空
+    }
+}
+
+// 3. 綁定事件：滑鼠點擊傳送按鈕時執行
+sendBtn.addEventListener('click', handleTextSubmit);
+
+// 4. 綁定事件：在輸入框裡按下鍵盤 Enter 鍵時也能傳送
+textInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        handleTextSubmit();
+    }
+});
   </script>
 </body>
 </html>
