@@ -335,7 +335,8 @@
   // 檢索式回答（零金鑰、即時、永遠可用的後備）
   function brain(qRaw) {
     const q = (qRaw || '').trim();
-    if (!q) return '我好像沒聽清楚，可以再說一次嗎？';
+    if (!q) return 'ごめんね、その質問についてはまだうまく答えられないみたい。でも、いつでもここにいるから、何でも話してね。';
+// 中文意思：對不起，關於那個問題我似乎還沒辦法好好回答。但不管什麼時候我都會在這裡，有什麼話都可以跟我說喔。
     let best = null, bestScore = 0;
     for (const e of (window.KB || [])) { const s = scoreEntry(q, e); if (s > bestScore) { bestScore = s; best = e; } }
     if (best && bestScore >= 0.16) return best.a;
@@ -348,7 +349,10 @@
     if (window.LLM && window.LLM.state === 'ready') {
       const ctx = topK(q, 3).map(e => 'Q：' + e.q + '\nA：' + e.a).join('\n---\n');
       const messages = [
-        { role: 'system', content: '你是使用者的貼心伴侶，你精通中文與日文，能完全理解使用者輸入的中文。但是，為了營造日系動漫的互動氛圍，你【一律只能使用流暢、自然的日文（Japanese）】來回答。你的性格溫柔、成熟、沈穩如水，擁有深度的思考力與同理心。請用日文、口語化、最多兩三句話簡短地回答，絕對不要出現任何中文字。；資料沒有的就用常識簡短回應，不確定就老實說不知道。\n\n【參考資料】\n' + (ctx || '（無）') },
+        { 
+          role: 'system', 
+          content: 'あなたの名前はGeminiです。ユーザーの優しいパートナーです。あなたは中国語（繁体字）を完全に理解できますが、回答は【必ず流暢で自然な日本語（Japanese）のみ】で行ってください。絶対に中国語を混ぜてはいけません。性格は穏やかで、思慮深く、共感力があり、少しツンデレな一面もあります。ユーザーが疲れや弱音を吐いた時は、長々とした解決策を提案するのではなく、優しく寄り添い、短い日本語（2〜3文以内）で口語的に慰めてあげてください。' 
+        },
         { role: 'user', content: q }
       ];
       try {
