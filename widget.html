@@ -171,7 +171,7 @@
   let audioMouth = 0, useAudioMouth = false, audioCtx = null;
   let speakSeq = 0, currentSource = null, currentRaf = 0; // 控制「點第二下打斷第一下」
   let neuralDisabled = false; // 抓不到神經語音後端就鎖定瀏覽器語音，避免每句都打 404
-  const NEURAL_VOICE = CFG.get('voice') || 'zh-TW-HsiaoChenNeural'; // 微軟神經語音「曉臻」（可用 data-voice 覆蓋）
+  const NEURAL_VOICE = CFG.get('voice') || 'ja-JP-NanamiNeural'; /// 換成微軟極其自然的日文神經女聲
   let recognition = null, listening = false;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -348,7 +348,7 @@
     if (window.LLM && window.LLM.state === 'ready') {
       const ctx = topK(q, 3).map(e => 'Q：' + e.q + '\nA：' + e.a).join('\n---\n');
       const messages = [
-        { role: 'system', content: '你是「可嵌入任何網站的語音虛擬人元件」的示範助手。主題是教人「怎麼把這個元件裝到自己的網站、怎麼換成自己的角色、怎麼使用」。請用繁體中文、口語、最多兩三句話簡短回答。優先依據【參考資料】回答；資料沒有的就用常識簡短回應，不確定就老實說不知道。\n\n【參考資料】\n' + (ctx || '（無）') },
+        { role: 'system', content: '你是使用者的貼心伴侶，你精通中文與日文，能完全理解使用者輸入的中文。但是，為了營造日系動漫的互動氛圍，你【一律只能使用流暢、自然的日文（Japanese）】來回答。你的性格溫柔、成熟、沈穩如水，擁有深度的思考力與同理心。請用日文、口語化、最多兩三句話簡短地回答，絕對不要出現任何中文字。；資料沒有的就用常識簡短回應，不確定就老實說不知道。\n\n【參考資料】\n' + (ctx || '（無）') },
         { role: 'user', content: q }
       ];
       try {
