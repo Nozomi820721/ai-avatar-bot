@@ -468,17 +468,18 @@
   }
 
   // ===== 控制列 =====
+  // ===== 控制列 =====
   document.getElementById('btn-close').onclick = () => postToParent('close');
 
-  
-  ();
+  // (提示清單 renderSuggestions 已被我們優雅地移除，不留痕跡)
+
   document.getElementById('btn-mic').onclick   = () => startListening();
   document.getElementById('btn-mute').onclick  = () => {
     ttsMuted = !ttsMuted;
     const mb = document.getElementById('btn-mute');
     mb.textContent = ttsMuted ? '🔇' : '🔊';
     mb.setAttribute('aria-pressed', String(ttsMuted));
-    if (ttsMuted) stopSpeaking(); // 立刻停掉正在播的（神經語音 + 瀏覽器語音）
+    if (ttsMuted) stopSpeaking(); 
     showBubble(ttsMuted ? '已靜音' : '已開啟語音');
   };
   document.getElementById('btn-speed').onclick = () => {
@@ -499,38 +500,28 @@
       speak('AI 大腦啟用完成，現在我可以聊得更自然囉！');
     } catch (e) { btn.textContent = '🧠✗'; showBubble('AI 大腦載入失敗：' + (e && e.message || e)); }
   };
+
   // ===== 新增的打字輸入控制邏輯 =====
-// 1. 確保網頁元件都載入完成後再執行
-window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', () => {
     const textInput = document.getElementById('user-text-input');
     const sendBtn = document.getElementById('send-text-btn');
 
-    // 如果畫面上有這兩個元件，才開始綁定功能
     if (textInput && sendBtn) {
-        
-        // 2. 定義傳送文字的動作
         function handleTextSubmit() {
-            const text = textInput.value.trim(); // 取得打字的內容
-            
+            const text = textInput.value.trim();
             if (text !== "") { 
-                // 【核心修正】呼叫原作者真正的處理函式：handleUser
-                handleUser(text); 
-                
-                textInput.value = ""; // 成功送出後，清空輸入框
+                handleUser(text); // 連接到正確的問答流程
+                textInput.value = ""; 
             }
         }
-
-        // 3. 綁定按鈕點擊事件
         sendBtn.addEventListener('click', handleTextSubmit);
-
-        // 4. 綁定鍵盤 Enter 事件
         textInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 handleTextSubmit();
             }
         });
     }
-});
+  });
   </script>
 </body>
 </html>
