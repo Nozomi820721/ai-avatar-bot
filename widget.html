@@ -82,9 +82,42 @@
     <div id="suggestions"></div>
     <div id="control-bar" role="toolbar" aria-label="虛擬人控制列">
       <button class="ctrl primary" id="btn-mic"   aria-label="開始語音對話"><span aria-hidden="true">🎤</span> 說話</button>
-      <div id="text-input-container" style="position: absolute; bottom: 120px; left: 10px; right: 10px; display: flex; gap: 5px; z-index: 999;">
-    <input type="text" id="user-text-input" placeholder="對我說點什麼吧..." style="flex: 1; padding: 8px; border-radius: 20px; border: 1px solid #ccc; outline: none;">
-    <button id="send-text-btn" style="padding: 8px 15px; border-radius: 20px; background-color: #6c5ce7; color: white; border: none; cursor: pointer;">傳送</button>
+      <div id="text-input-container" style="
+    position: fixed; 
+    bottom: 20px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    width: 90%; 
+    max-width: 600px; 
+    display: flex; 
+    gap: 10px; 
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.9); 
+    padding: 10px; 
+    border-radius: 30px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    backdrop-filter: blur(5px);
+">
+    <input type="text" id="user-text-input" placeholder="對我說點什麼吧..." style="
+        flex: 1; 
+        padding: 12px 20px; 
+        border-radius: 25px; 
+        border: 1px solid #e0e0e0; 
+        outline: none;
+        font-size: 16px;
+        background: white;
+    ">
+    <button id="send-text-btn" style="
+        padding: 0 25px; 
+        border-radius: 25px; 
+        background-color: #6c5ce7; 
+        color: white; 
+        border: none; 
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background 0.2s;
+    ">傳送</button>
 </div>
       <button class="ctrl" id="btn-llm"   aria-label="啟用瀏覽器內 AI 大腦（首次需下載模型）" aria-pressed="false"><span aria-hidden="true">🧠</span></button>
       <button class="ctrl" id="btn-mute"  aria-label="靜音" aria-pressed="false"><span aria-hidden="true">🔊</span></button>
