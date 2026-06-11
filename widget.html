@@ -84,7 +84,7 @@
       <button class="ctrl primary" id="btn-mic"   aria-label="開始語音對話"><span aria-hidden="true">🎤</span> 說話</button>
       <div id="text-input-container" style="
     position: absolute; 
-    bottom: 75px; 
+    bottom: 50px; 
     left: 10px; 
     right: 10px; 
     display: flex; 
@@ -470,20 +470,8 @@
   // ===== 控制列 =====
   document.getElementById('btn-close').onclick = () => postToParent('close');
 
-  // 範例提示清單：一進站就告訴使用者「可以說什麼」，點任一項＝直接問（語音/打字都不用先猜）
-  (function renderSuggestions() {
-    const box = document.getElementById('suggestions');
-    if (!box) return;
-    const SUGGESTIONS = ['怎麼安裝？', '怎麼換成我的角色？', '要不要錢？', '麥克風怎麼用？', '我可以說什麼？'];
-    const label = document.createElement('div'); label.className = 'sg-label'; label.textContent = '💬 你可以問我：';
-    box.appendChild(label);
-    SUGGESTIONS.forEach((s) => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'sugg'; b.textContent = s;
-      b.onclick = () => handleUser(s.replace(/？$/, ''));
-      box.appendChild(b);
-    });
-  })();
+  
+  ();
   document.getElementById('btn-mic').onclick   = () => startListening();
   document.getElementById('btn-mute').onclick  = () => {
     ttsMuted = !ttsMuted;
