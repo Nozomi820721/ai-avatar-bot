@@ -311,8 +311,14 @@
     let best = null, bestScore = 0;
     for (const e of (window.KB || [])) { const s = scoreEntry(q, e); if (s > bestScore) { bestScore = s; best = e; } }
     
-    // 題庫備用：如果找到答案，暫時中日文顯示一樣的
-    if (best && bestScore >= 0.16) return { zh: best.a, ja: best.a }; 
+    // 💡 防呆機制一：如果使用者沒有點亮 🧠 大腦，跑去讀原本的中文知識庫（如：怎麼安裝）時
+    // 因為知識庫是中文字，日文語音無法閱讀。我們讓字幕維持中文，但語音播放溫柔的萬用日文，防止喇叭發出怪音！
+    if (best && bestScore >= 0.16) {
+        return { 
+          zh: best.a, 
+          ja: 'はい、分かりました。画面の案内をご覧くださいね。' 
+        }; 
+    }
     
     return { 
       zh: '對不起，關於那個問題我似乎還沒辦法好好回答。但不管什麼時候我都會在這裡，有什麼話都可以跟我說喔。', 
@@ -320,39 +326,47 @@
     };
   }
 
- async function answer(q) {
+  async function answer(q) {
     q = (q || '').trim();
-    if (!q) return { zh: '我沒聽清楚呢。', ja: 'ごめんね、聞き取れなかったよ。' };
+    if (!q) return { zh: '我沒聽清楚呢。', ja: 'ごめんね、聞き取れなかったよ' };
     
     if (window.LLM && window.LLM.state === 'ready') {
-      // 💡 強化提示詞：我們塞入一段「假對話範例」，逼迫小模型模仿這個嚴格的格式
+      // 💡 防呆機制二：給 1.5B 小模型一個標準的「一問一答範例」，逼它絕對遵守 [ZH] 和 [JA] 格式！
       const messages = [
         { 
           role: 'system', 
-          content: 'あなたはユーザーの優しいパートナー「Gemini」です。中国語（繁体字）と日本語を完全に理解できます。\n【超重要】回答時は必ず以下のフォーマット通りに、中国語の字幕と日本語のセリフを両方出力してください。他の言葉は一切不要です。\n\nフォーマット：\n[ZH] （中国語の短い慰めや返答）\n[JA] （日本語のセリフ）' 
+          content: 'あなたの名前はGeminiです。ユーザーの優しいパートナーです。中国語（繁体字）と日本語を完全に理解できます。\n【重要規則】回答する時は、必ず以下のフォーマットのみで、中国語の字幕と日本語のセリフを両方出力してください。他の解説は一切不要です。\n\nフォーマット：\n[ZH] （ここに中国語の返答）\n[JA] （ここに日本語のセリフ）' 
         },
-        // 👇 這邊是重點：給它一個範例，它就會乖乖照做
-        { role: 'user', content: '我今天覺得好累喔...' },
-        { role: 'assistant', content: '[ZH] 真的辛苦你了，好好休息一下吧。\n[JA] 本当にお疲れ様、ゆっくり休んでね。' },
-        { role: 'user', content: q } // 這是你真正輸入的話
+        { role: 'user', content: '我今天好累喔...' },
+        { role: 'assistant', content: '[ZH] 今天真的辛苦你了，好好休息一下吧。\n[JA] 今日は本当にお疲れ様。ゆっくり休んでね。' },
+        { role: 'user', content: q }
       ];
       try {
         showBubble('思考中…');
         const out = await window.LLM.chat(messages);
         if (out && out.trim()) {
           let result = out.trim();
-          let zhText = result;
-          let jaText = result;
+          let zhText = "";
+          let jaText = "";
           
-          // 💡 升級版切割機：容許小模型寫出 [ZH], 【ZH】, 或 ZH: 等格式
-          const zhMatch = result.match(/(?:\[ZH\]|【ZH】|ZH:)\s*([\s\S]*?)(?=(?:\[JA\]|【JA】|JA:)|$)/i);
-          const jaMatch = result.match(/(?:\[JA\]|【JA】|JA:)\s*([\s\S]*?)$/i);
+          // 💡 防呆機制三：修復並升級正則表達式，完美切開 [ZH] 與 [JA]
+          const zhMatch = result.match(/\[ZH\]([\s\S]*?)(?=\[JA\]|$)/i);
+          const jaMatch = result.match(/\[JA\]([\s\S]*?)$/i);
           
           if (zhMatch && jaMatch) {
               zhText = zhMatch[1].trim();
               jaText = jaMatch[1].trim();
           } else {
-              console.warn('AI 忘記加標籤了，原始輸出：', result);
+              // 終極防呆：如果小模型偶爾調皮忘記加標籤，去檢查它吐出來的是不是純中文
+              if (/[\u3040-\u309F\u30A0-\u30FF]/.test(result)) {
+                  // 如果包含日文假名，就直接當作日文語音，字幕用提示字
+                  zhText = "（日音伴隨中）";
+                  jaText = result;
+              } else {
+                  // 如果模型還是吐出純中文，字幕顯示中文，語音放溫柔日文，維持動漫感
+                  zhText = result;
+                  jaText = "そうですね、あなたのそばにいますよ。"; 
+              }
           }
           return { zh: zhText, ja: jaText }; 
         }
