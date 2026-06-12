@@ -320,17 +320,21 @@
     };
   }
 
-  async function answer(q) {
+ async function answer(q) {
     q = (q || '').trim();
     if (!q) return { zh: '我沒聽清楚呢。', ja: 'ごめんね、聞き取れなかったよ。' };
     
     if (window.LLM && window.LLM.state === 'ready') {
+      // 💡 強化提示詞：我們塞入一段「假對話範例」，逼迫小模型模仿這個嚴格的格式
       const messages = [
         { 
           role: 'system', 
-          content: 'あなたの名前はGeminiです。ユーザーの優しいパートナーです。あなたは中国語（繁体字）と日本語を完全に理解できます。回答する時は、必ず以下のフォーマットで、中国語（繁体字）の字幕と日本語の音声セリフを両方出力してください。\n\nフォーマット：\n[ZH] （ここに中国語の短い慰めや返答）\n[JA] （ここに日本語のセリフ）\n\nルール：2〜3文以内で短く、優しく寄り添うような口調にすること。絶対にフォーマットを守ってください。' 
+          content: 'あなたはユーザーの優しいパートナー「Gemini」です。中国語（繁体字）と日本語を完全に理解できます。\n【超重要】回答時は必ず以下のフォーマット通りに、中国語の字幕と日本語のセリフを両方出力してください。他の言葉は一切不要です。\n\nフォーマット：\n[ZH] （中国語の短い慰めや返答）\n[JA] （日本語のセリフ）' 
         },
-        { role: 'user', content: q }
+        // 👇 這邊是重點：給它一個範例，它就會乖乖照做
+        { role: 'user', content: '我今天覺得好累喔...' },
+        { role: 'assistant', content: '[ZH] 真的辛苦你了，好好休息一下吧。\n[JA] 本当にお疲れ様、ゆっくり休んでね。' },
+        { role: 'user', content: q } // 這是你真正輸入的話
       ];
       try {
         showBubble('思考中…');
@@ -340,15 +344,17 @@
           let zhText = result;
           let jaText = result;
           
-          // 字串切割機：把 [ZH] 和 [JA] 切開
-          const zhMatch = result.match(/\[ZH\]([\s\S]*?)(?=\[JA\]|$)/i);
-          const jaMatch = result.match(/\[JA\]([\s\S]*?)$/i);
+          // 💡 升級版切割機：容許小模型寫出 [ZH], 【ZH】, 或 ZH: 等格式
+          const zhMatch = result.match(/(?:\[ZH\]|【ZH】|ZH:)\s*([\s\S]*?)(?=(?:\[JA\]|【JA】|JA:)|$)/i);
+          const jaMatch = result.match(/(?:\[JA\]|【JA】|JA:)\s*([\s\S]*?)$/i);
           
           if (zhMatch && jaMatch) {
               zhText = zhMatch[1].trim();
               jaText = jaMatch[1].trim();
+          } else {
+              console.warn('AI 忘記加標籤了，原始輸出：', result);
           }
-          return { zh: zhText, ja: jaText }; // 將雙語包回傳給 speak 函式
+          return { zh: zhText, ja: jaText }; 
         }
       } catch (e) { console.warn('LLM error', e); }
     }
