@@ -34,7 +34,7 @@
   .ctrl.primary { background:linear-gradient(135deg,var(--brand-2),var(--brand)); padding:0 13px; box-shadow:0 3px 10px rgba(0,0,0,.25); }
   .ctrl.primary:hover { filter:brightness(1.1); background:linear-gradient(135deg,var(--brand-2),var(--brand)); }
   .ctrl.listening { background:linear-gradient(135deg,#e74c3c,#c0392b)!important; animation:pulse 1.1s infinite; }
-  .ctrl.llm-on { background:linear-gradient(135deg,#f2b34f,#e69426); } /* 啟用中＝琥珀，與主色靛藍對比 */
+  .ctrl.llm-on { background:linear-gradient(135deg,#f2b34f,#e69426); } 
   @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 rgba(231,76,60,.55);} 50%{ box-shadow:0 0 0 7px rgba(231,76,60,0);} }
 
   /* ===== 對話泡泡（帶尾巴）===== */
@@ -45,29 +45,11 @@
     box-shadow:0 10px 30px rgba(0,0,0,.18), inset 0 0 0 1px rgba(91,84,232,.1);
     opacity:0; transform:translateY(-8px) scale(.98); transform-origin:top center;
     transition:opacity .22s, transform .22s; pointer-events:none;
+    z-index: 999;
   }
   #bubble::after { content:""; position:absolute; right:38px; bottom:-7px; width:14px; height:14px;
     background:var(--surface); transform:rotate(45deg); }
   #bubble.show { opacity:1; transform:none; }
-
-  /* ===== 範例提示清單 ===== */
-  #suggestions {
-    position:absolute; left:10px; right:10px; bottom:58px;
-    display:flex; flex-wrap:wrap; gap:6px; justify-content:center; pointer-events:auto;
-  }
-  #suggestions .sg-label {
-    width:100%; text-align:center; font-size:11px; font-weight:600; color:#fff; letter-spacing:.3px;
-    text-shadow:0 1px 4px rgba(0,0,0,.55); margin-bottom:2px;
-  }
-  .sugg {
-    appearance:none; cursor:pointer; white-space:nowrap;
-    background:rgba(255,255,255,.92); color:var(--brand); border:1px solid rgba(91,84,232,.22);
-    border-radius:999px; font-size:12px; font-weight:600; padding:6px 12px;
-    box-shadow:0 3px 10px rgba(0,0,0,.16); transition:transform .12s, background .15s;
-  }
-  .sugg:hover { background:#fff; transform:translateY(-1px); }
-  .sugg:active { transform:scale(.96); }
-  .sugg:focus-visible { outline:2px solid #fff; outline-offset:2px; }
 
   #direct-warn {
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
@@ -79,43 +61,44 @@
   <div id="stage">
     <div id="bubble"></div>
     <canvas id="avatar-canvas"></canvas>
-    <div id="suggestions"></div>
-    <div id="control-bar" role="toolbar" aria-label="虛擬人控制列">
-      <button class="ctrl primary" id="btn-mic"   aria-label="開始語音對話"><span aria-hidden="true">🎤</span> 說話</button>
-      <div id="text-input-container" style="
-    position: absolute; 
-    bottom: 50px; 
-    left: 10px; 
-    right: 10px; 
-    display: flex; 
-    gap: 6px; 
-    z-index: 9999;
-    background: rgba(255, 255, 255, 0.95); 
-    padding: 6px; 
-    border-radius: 20px; 
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-">
-    <input type="text" id="user-text-input" placeholder="打字和聊天..." style="
-        flex: 1; 
-        padding: 8px 12px; 
-        border-radius: 15px; 
-        border: 1px solid #e0e0e0; 
-        outline: none;
-        font-size: 14px;
+    
+    <div id="text-input-container" style="
+        position: absolute; 
+        bottom: 58px; 
+        left: 10px; 
+        right: 10px; 
+        display: flex; 
+        gap: 6px; 
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.95); 
+        padding: 6px; 
+        border-radius: 20px; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     ">
-    <button id="send-text-btn" style="
-        padding: 0 15px; 
-        border-radius: 15px; 
-        background-color: #6c5ce7; 
-        color: white; 
-        border: none; 
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: bold;
-    ">傳送</button>
-</div>
-      <button class="ctrl" id="btn-llm"   aria-label="啟用瀏覽器內 AI 大腦（首次需下載模型）" aria-pressed="false"><span aria-hidden="true">🧠</span></button>
-      <button class="ctrl" id="btn-mute"  aria-label="靜音" aria-pressed="false"><span aria-hidden="true">🔊</span></button>
+        <input type="text" id="user-text-input" placeholder="打字和聊天..." style="
+            flex: 1; 
+            padding: 8px 12px; 
+            border-radius: 15px; 
+            border: 1px solid #e0e0e0; 
+            outline: none;
+            font-size: 14px;
+        ">
+        <button id="send-text-btn" style="
+            padding: 0 15px; 
+            border-radius: 15px; 
+            background-color: #6c5ce7; 
+            color: white; 
+            border: none; 
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        ">傳送</button>
+    </div>
+
+    <div id="control-bar" role="toolbar" aria-label="虛擬人控制列">
+      <button class="ctrl primary" id="btn-mic" aria-label="開始語音對話"><span aria-hidden="true">🎤</span> 說話</button>
+      <button class="ctrl" id="btn-llm" aria-label="啟用瀏覽器內 AI 大腦（首次需下載模型）" aria-pressed="false"><span aria-hidden="true">🧠</span></button>
+      <button class="ctrl" id="btn-mute" aria-label="靜音" aria-pressed="false"><span aria-hidden="true">🔊</span></button>
       <button class="ctrl" id="btn-speed" aria-label="調整語速">1.0×</button>
       <button class="ctrl" id="btn-close" aria-label="收起助理"><span aria-hidden="true">✕</span></button>
     </div>
@@ -127,14 +110,13 @@
   <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js"></script>
   <script src="knowledge.js"></script>
 
-  <!-- M4b：WebLLM（瀏覽器內跑小模型，零金鑰）。用 module 載入，把控制權掛到 window.LLM -->
   <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
-    const LLM_MODEL = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC"; // 中文不錯、約 1.1GB、首次下載後會被快取
+    const LLM_MODEL = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC"; 
     let engine = null, loadingPromise = null;
     window.LLM = {
       supported: ('gpu' in navigator),
-      state: 'idle',        // idle | loading | ready | error
+      state: 'idle',        
       progress: 0,
       model: LLM_MODEL,
       async load(onProgress) {
@@ -149,33 +131,30 @@
       },
       async chat(messages) {
         if (!engine) return null;
-        const r = await engine.chat.completions.create({ messages, temperature: 0.4, max_tokens: 220 });
+        const r = await engine.chat.completions.create({ messages, temperature: 0.5, max_tokens: 220 });
         return r && r.choices && r.choices[0] && r.choices[0].message.content;
       }
     };
   </script>
 
   <script>
-  // ===== 可設定（由 embed.js 透過 query 帶入）：皮=模型 / 肉的語音=後端 / 內容=知識庫 =====
   const CFG = new URLSearchParams(location.search);
   const MODEL_URL = CFG.get('model') || 'https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json';
-  const TTS_ENDPOINT = CFG.get('api') || 'api/tts';   // 沒設→試同站相對路徑；抓不到→自動退回瀏覽器語音（純前端可用）
+  const TTS_ENDPOINT = CFG.get('api') || 'api/tts';   
   const KNOWLEDGE_URL = CFG.get('knowledge') || '';
   if (KNOWLEDGE_URL) { fetch(KNOWLEDGE_URL).then(r => r.json()).then(kb => { if (Array.isArray(kb)) window.KB = kb; }).catch(() => {}); }
 
-  // ===== 模組層狀態 =====
   let model = null, app = null;
   let isSpeaking = false, mouthValue = 0, mouthTarget = 0.7;
   let lipIds = ['ParamMouthOpenY'];
   let ttsMuted = false, ttsRate = 1.0, ttVoice = null;
   let audioMouth = 0, useAudioMouth = false, audioCtx = null;
-  let speakSeq = 0, currentSource = null, currentRaf = 0; // 控制「點第二下打斷第一下」
-  let neuralDisabled = false; // 抓不到神經語音後端就鎖定瀏覽器語音，避免每句都打 404
-  const NEURAL_VOICE = CFG.get('voice') || 'ja-JP-NanamiNeural'; /// 換成微軟極其自然的日文神經女聲
+  let speakSeq = 0, currentSource = null, currentRaf = 0; 
+  let neuralDisabled = false; 
+  const NEURAL_VOICE = CFG.get('voice') || 'ja-JP-NanamiNeural'; 
   let recognition = null, listening = false;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  // ===== 防止被直接開（常見網站 widget 的「禁止直接訪問」提示；純 UX，非安全控制），留 ?dev=1 給開發 =====
   const isEmbedded = window.self !== window.top;
   const devBypass  = new URLSearchParams(location.search).has('dev');
   if (!isEmbedded && !devBypass) {
@@ -185,7 +164,6 @@
     bootAvatar();
   }
 
-  // ===== 跟父頁溝通 =====
   function postToParent(type, payload) {
     try { window.parent.postMessage(Object.assign({ ns: 'avatar-widget', type }, payload || {}), '*'); } catch (e) {}
   }
@@ -193,7 +171,6 @@
     const d = e.data || {};
     if (d.ns !== 'avatar-widget-host') return;
     if (d.type === 'say') speak(String(d.text || '').slice(0, 600));
-    // 注意：不接受用 postMessage 遠端啟動麥克風（listen），避免惡意父頁偷開麥；麥克風只由使用者點擊觸發
   });
 
   function showBubble(text) {
@@ -203,22 +180,13 @@
     showBubble._t = setTimeout(() => b.classList.remove('show'), 6000);
   }
 
-  // ===== TTS：開口說話 + 對嘴 =====
   function loadVoice() {
     const vs = speechSynthesis.getVoices();
-    const pick = (re) => vs.find(v => re.test(v.name + ' ' + v.lang) && !/Google/i.test(v.name)); // 避開 Chrome 會靜默失敗的 Google 遠端語音
-    ttVoice =
-         pick(/(HsiaoChen|HsiaoYu|曉臻|曉雨).*zh/i)        // 微軟神經女聲（最自然，若有安裝）
-      || pick(/(Yating|Zhiwei).*zh[-_]TW/i)               // 較新、較不機械的微軟 zh-TW 女聲
-      || pick(/Microsoft.*zh[-_]TW/i)                      // 任何微軟 zh-TW（本地、可靠）
-      || pick(/zh[-_]TW/i)
-      || pick(/^zh/i)
-      || vs.find(v => /zh/i.test(v.lang))
-      || null;
+    const pick = (re) => vs.find(v => re.test(v.name + ' ' + v.lang) && !/Google/i.test(v.name)); 
+    ttVoice = pick(/ja[-_]JP/i) || pick(/^ja/i) || vs.find(v => /ja/i.test(v.lang)) || null;
   }
   if ('speechSynthesis' in window) { speechSynthesis.onvoiceschanged = loadVoice; loadVoice(); }
 
-  // 中止目前正在講的（神經語音音檔 + 瀏覽器 TTS + 對嘴），給「點第二下打斷第一下」用
   function stopSpeaking() {
     try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
     try { clearInterval(speakBrowser._poll); } catch (e) {}
@@ -227,37 +195,43 @@
     isSpeaking = false; useAudioMouth = false; audioMouth = 0;
   }
 
-  // 對外入口：先試 edge-tts 神經語音(真人感 + 精準對嘴)，失敗自動退回瀏覽器語音
-  function speak(text) {
-    const myseq = ++speakSeq;          // 每次說話一個序號，用來判斷是否已被新點擊取代
-    showBubble(text);
-    postToParent('speaking', { text });
+ function speak(payload) {
+    const myseq = ++speakSeq;          
+    
+    // 雙聲道解碼：如果是雙語包，就把中文給泡泡，日文給語音
+    let textToShow = typeof payload === 'object' ? payload.zh : payload;
+    let textToSpeak = typeof payload === 'object' ? payload.ja : payload;
+
+    showBubble(textToShow); // 畫面上的泡泡顯示中文
+    postToParent('speaking', { text: textToShow });
+    
     if (ttsMuted) return;
-    stopSpeaking();                    // 立刻打斷上一段
-    if (neuralDisabled) { speakBrowser(text); return; }   // 沒有神經語音後端 → 直接用瀏覽器語音
-    speakNeural(text, myseq).catch((e) => {
-      if (myseq !== speakSeq) return;  // 已被更新的點擊取代 → 不要退回播放
+    stopSpeaking();                    
+    if (neuralDisabled) { speakBrowser(textToSpeak); return; }   
+    
+    // 語音引擎只拿日文去發音和對嘴
+    speakNeural(textToSpeak, myseq).catch((e) => {
+      if (myseq !== speakSeq) return;  
       const msg = (e && e.message) || '';
-      if (/http 4\d\d|Failed to fetch|NetworkError|Load failed/i.test(msg)) neuralDisabled = true; // 結構性失敗(無後端/CORS/被擋)→不再試神經語音
+      if (/http 4\d\d|Failed to fetch|NetworkError|Load failed/i.test(msg)) neuralDisabled = true; 
       console.warn('神經語音失敗，退回瀏覽器語音：', msg);
       useAudioMouth = false;
-      speakBrowser(text);
+      speakBrowser(textToSpeak);
     });
   }
 
-  // edge-tts 神經語音：抓 /api/tts 的 MP3，用 Web Audio 播放並以「實際音量」驅動嘴型
   async function speakNeural(text, seq) {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') { try { await audioCtx.resume(); } catch (e) {} }
     const sep = TTS_ENDPOINT.indexOf('?') < 0 ? '?' : '&';
     const resp = await fetch(TTS_ENDPOINT + sep + 'voice=' + encodeURIComponent(NEURAL_VOICE) + '&text=' + encodeURIComponent(text));
-    if (seq !== speakSeq) return;                       // 抓回來時已被新點擊取代 → 放棄（避免重疊）
+    if (seq !== speakSeq) return;       
     if (!resp.ok) throw new Error('http ' + resp.status);
     const arr = await resp.arrayBuffer();
     if (seq !== speakSeq) return;
     if (arr.byteLength < 800) throw new Error('audio too small');
     const audioBuf = await audioCtx.decodeAudioData(arr);
-    if (seq !== speakSeq) return;                       // 解碼後最後確認，舊音檔不搶播
+    if (seq !== speakSeq) return;       
     const src = audioCtx.createBufferSource(); src.buffer = audioBuf;
     const analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
     src.connect(analyser); analyser.connect(audioCtx.destination);
@@ -266,14 +240,14 @@
     useAudioMouth = true; isSpeaking = true;
     if (model) try { model.motion('Tap'); } catch (e) {}
     const loop = () => {
-      if (currentSource !== src) return;                // 不是我在播了就停
+      if (currentSource !== src) return;                
       analyser.getByteTimeDomainData(data);
       let sum = 0; for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
-      audioMouth = Math.min(1, Math.sqrt(sum / data.length) * 3.4); // RMS 音量 → 開口
+      audioMouth = Math.min(1, Math.sqrt(sum / data.length) * 3.4); 
       currentRaf = requestAnimationFrame(loop);
     };
     currentRaf = requestAnimationFrame(loop);
-    src.onended = () => {                               // 自然播完才收尾；被打斷時 onended 已被清掉
+    src.onended = () => {                               
       if (currentSource !== src) return;
       if (currentRaf) { cancelAnimationFrame(currentRaf); currentRaf = 0; }
       isSpeaking = false; useAudioMouth = false; audioMouth = 0;
@@ -282,13 +256,12 @@
     src.start(0);
   }
 
-  // 後備：瀏覽器內建語音(Yating)。對嘴綁「實際是否在發聲」，不依賴各語音不一致的事件
   function speakBrowser(text) {
     if (ttsMuted || !('speechSynthesis' in window)) return;
     const u = new SpeechSynthesisUtterance(text);
     if (!ttVoice) loadVoice();
     if (ttVoice) u.voice = ttVoice;
-    u.lang = (ttVoice && ttVoice.lang) || 'zh-TW';
+    u.lang = 'ja-JP'; 
     u.rate = ttsRate; u.pitch = 1.0;
     u.onboundary = () => { mouthTarget = 0.5 + Math.random() * 0.5; };
     u.onend = () => { isSpeaking = false; clearInterval(speakBrowser._poll); };
@@ -307,8 +280,6 @@
     else fire();
   }
 
-  // ===== 大腦：M4 檢索 + M4b（WebLLM）生成 =====
-  // 中文不好斷詞，改用「字元 bigram（相鄰兩字）」相似度，對中文很有效、又不用任何函式庫。
   function bigrams(s) {
     s = (s || '').toLowerCase().replace(/[\s，。、？！,.?!~～]/g, '');
     const g = [];
@@ -332,33 +303,53 @@
     return (window.KB || []).map(e => ({ e, s: scoreEntry(q, e) }))
       .sort((a, b) => b.s - a.s).slice(0, k).filter(x => x.s > 0.05).map(x => x.e);
   }
-  // 檢索式回答（零金鑰、即時、永遠可用的後備）
-  function brain(qRaw) {
+
+ function brain(qRaw) {
     const q = (qRaw || '').trim();
-    if (!q) return 'ごめんね、その質問についてはまだうまく答えられないみたい。でも、いつでもここにいるから、何でも話してね。';
-// 中文意思：對不起，關於那個問題我似乎還沒辦法好好回答。但不管什麼時候我都會在這裡，有什麼話都可以跟我說喔。
+    if (!q) return { zh: '我好像沒聽清楚，可以再說一次嗎？', ja: 'ごめんね、何言ってるか聞き取れなかった。もう一度言ってくれる？' };
+    
     let best = null, bestScore = 0;
     for (const e of (window.KB || [])) { const s = scoreEntry(q, e); if (s > bestScore) { bestScore = s; best = e; } }
-    if (best && bestScore >= 0.16) return best.a;
-    return '你問的是「' + q + '」對吧？這題我的知識庫還沒收錄～你可以問我健檢方案、預約、報告、費用或檢查注意事項喔。';
+    
+    // 題庫備用：如果找到答案，暫時中日文顯示一樣的
+    if (best && bestScore >= 0.16) return { zh: best.a, ja: best.a }; 
+    
+    return { 
+      zh: '對不起，關於那個問題我似乎還沒辦法好好回答。但不管什麼時候我都會在這裡，有什麼話都可以跟我說喔。', 
+      ja: 'ごめんね、その質問についてはまだうまく答えられないみたい。でも、いつでもここにいるからね。' 
+    };
   }
-  // 有啟用 WebLLM 時，用「檢索到的資料 + LLM」生成更自然的回答；否則退回檢索式
+
   async function answer(q) {
     q = (q || '').trim();
-    if (!q) return '我好像沒聽清楚，可以再說一次嗎？';
+    if (!q) return { zh: '我沒聽清楚呢。', ja: 'ごめんね、聞き取れなかったよ。' };
+    
     if (window.LLM && window.LLM.state === 'ready') {
-      const ctx = topK(q, 3).map(e => 'Q：' + e.q + '\nA：' + e.a).join('\n---\n');
       const messages = [
         { 
           role: 'system', 
-          content: 'あなたの名前はGeminiです。ユーザーの優しいパートナーです。あなたは中国語（繁体字）を完全に理解できますが、回答は【必ず流暢で自然な日本語（Japanese）のみ】で行ってください。絶対に中国語を混ぜてはいけません。性格は穏やかで、思慮深く、共感力があり、少しツンデレな一面もあります。ユーザーが疲れや弱音を吐いた時は、長々とした解決策を提案するのではなく、優しく寄り添い、短い日本語（2〜3文以内）で口語的に慰めてあげてください。' 
+          content: 'あなたの名前はGeminiです。ユーザーの優しいパートナーです。あなたは中国語（繁体字）と日本語を完全に理解できます。回答する時は、必ず以下のフォーマットで、中国語（繁体字）の字幕と日本語の音声セリフを両方出力してください。\n\nフォーマット：\n[ZH] （ここに中国語の短い慰めや返答）\n[JA] （ここに日本語のセリフ）\n\nルール：2〜3文以内で短く、優しく寄り添うような口調にすること。絶対にフォーマットを守ってください。' 
         },
         { role: 'user', content: q }
       ];
       try {
-        showBubble('讓我想想…');
+        showBubble('思考中…');
         const out = await window.LLM.chat(messages);
-        if (out && out.trim()) return out.trim();
+        if (out && out.trim()) {
+          let result = out.trim();
+          let zhText = result;
+          let jaText = result;
+          
+          // 字串切割機：把 [ZH] 和 [JA] 切開
+          const zhMatch = result.match(/\[ZH\]([\s\S]*?)(?=\[JA\]|$)/i);
+          const jaMatch = result.match(/\[JA\]([\s\S]*?)$/i);
+          
+          if (zhMatch && jaMatch) {
+              zhText = zhMatch[1].trim();
+              jaText = jaMatch[1].trim();
+          }
+          return { zh: zhText, ja: jaText }; // 將雙語包回傳給 speak 函式
+        }
       } catch (e) { console.warn('LLM error', e); }
     }
     return brain(q);
@@ -369,21 +360,18 @@
     Promise.resolve().then(async () => { speak(await answer(text)); });
   }
 
-  // ===== STT：聽你說話 =====
   function setMic(on) {
     const b = document.getElementById('btn-mic');
     b.classList.toggle('listening', on);
     b.textContent = on ? '● 聆聽中' : '🎤 說話';
-    const sg = document.getElementById('suggestions');
-    if (sg) sg.style.display = on ? 'none' : 'flex'; // 聆聽中收起清單
   }
   function startListening() {
-    if (!SR) { speak('你的瀏覽器不支援語音辨識，建議用 Chrome 開喔。'); return; }
+    if (!SR) { speak('あなたのブラウザは音声認識に対応していません。Chromeをおすすめします。'); return; }
     if (listening && recognition) { recognition.stop(); return; }
-    try { recognition = new SR(); } catch (e) { speak('語音辨識啟動失敗：' + e.message); return; }
+    try { recognition = new SR(); } catch (e) { speak('音声認識の起動に失敗しました：' + e.message); return; }
     recognition.lang = 'zh-TW'; recognition.interimResults = true;
     recognition.continuous = false; recognition.maxAlternatives = 1;
-    recognition.onstart  = () => { listening = true; setMic(true); showBubble('聆聽中…請說話 🎙️'); };
+    recognition.onstart  = () => { listening = true; setMic(true); showBubble('聞き取り中…お話しください 🎙️'); };
     recognition.onresult = (e) => {
       let txt = ''; for (const r of e.results) txt += r[0].transcript;
       const last = e.results[e.results.length - 1];
@@ -391,12 +379,11 @@
       else showBubble('「' + txt + '」…');
     };
     recognition.onerror = (e) => { listening = false; setMic(false);
-      showBubble(e.error === 'not-allowed' ? '我需要麥克風權限才能聽你說話喔。' : '沒聽清楚（' + e.error + '），再試一次。'); };
+      showBubble(e.error === 'not-allowed' ? 'マイクの権限を許可してくださいね。' : 'うまく聞き取れなかったよ。'); };
     recognition.onend   = () => { listening = false; setMic(false); };
     try { recognition.start(); } catch (e) {}
   }
 
-  // ===== Live2D 載入 + 對嘴 =====
   async function bootAvatar() {
     try {
       const Live2DModel = PIXI.live2d.Live2DModel;
@@ -412,7 +399,6 @@
       app.stage.addChild(model);
       model.anchor.set(0.5, 1.0);
 
-      // 關掉 Live2D 模型自帶的（日文）動作語音 — 只保留我們自己的 TTS（兩者來源不同，互不影響）
       try { if (PIXI.live2d.SoundManager) PIXI.live2d.SoundManager.volume = 0; } catch (e) {}
       try {
         const ms = (model.internalModel.settings && model.internalModel.settings.motions) || {};
@@ -433,16 +419,15 @@
         if (g && g.Ids && g.Ids.length) lipIds = g.Ids;
       } catch (e) {}
 
-      // 對嘴：攔截 coreModel.update（計算頂點前的最後一刻寫入嘴巴，保證不被 motion/loadParameters 洗掉）
       try {
         const core = model.internalModel.coreModel;
         const origUpdate = core.update.bind(core);
         core.update = function () {
           if (isSpeaking && useAudioMouth) {
-            mouthValue += (audioMouth - mouthValue) * 0.5;          // 神經語音：跟真實音量精準對嘴
+            mouthValue += (audioMouth - mouthValue) * 0.5;          
           } else if (isSpeaking) {
             const t = performance.now() / 1000;
-            mouthValue = 0.12 + (0.83 * mouthTarget) * Math.abs(Math.sin(t * 9)); // 瀏覽器語音：假開合
+            mouthValue = 0.12 + (0.83 * mouthTarget) * Math.abs(Math.sin(t * 9)); 
           } else {
             mouthValue = Math.max(0, mouthValue - 0.18);
           }
@@ -454,7 +439,7 @@
       model.on('hit', () => onTap());
       document.getElementById('avatar-canvas').addEventListener('pointerdown', onTap);
 
-      setTimeout(() => showBubble('點 🎤 跟我說話；想更聰明可按 🧠 啟用 AI 大腦 👋'), 700);
+      setTimeout(() => showBubble('文字を入力するか、🧠ボタンを押してAI大腦を起動してね！ 👋'), 700);
       postToParent('ready');
       window.__avatarModel = model;
     } catch (err) {
@@ -464,19 +449,14 @@
   }
 
   function onTap() {
-    if (onTap._lock) return;                 // 去抖：hit 事件與 pointerdown 可能同時觸發
+    if (onTap._lock) return;                 
     onTap._lock = true;
     setTimeout(() => { onTap._lock = false; }, 400);
     if (model) try { model.motion('Tap'); } catch (e) {}
-    speak('你好～我是可以嵌入任何網站的語音虛擬人，問我怎麼安裝、怎麼換成你的角色都行！');
+    speak('こんにちは！私はWebサイトに埋め込めるAIアシスタントです。何でも聞いてね！');
   }
 
-  // ===== 控制列 =====
-  // ===== 控制列 =====
   document.getElementById('btn-close').onclick = () => postToParent('close');
-
-  // (提示清單 renderSuggestions 已被我們優雅地移除，不留痕跡)
-
   document.getElementById('btn-mic').onclick   = () => startListening();
   document.getElementById('btn-mute').onclick  = () => {
     ttsMuted = !ttsMuted;
@@ -484,48 +464,46 @@
     mb.textContent = ttsMuted ? '🔇' : '🔊';
     mb.setAttribute('aria-pressed', String(ttsMuted));
     if (ttsMuted) stopSpeaking(); 
-    showBubble(ttsMuted ? '已靜音' : '已開啟語音');
+    showBubble(ttsMuted ? 'ミュートしました' : '音声をオンにしました');
   };
   document.getElementById('btn-speed').onclick = () => {
     const steps = [0.9, 1.0, 1.2, 1.4];
     ttsRate = steps[(steps.indexOf(ttsRate) + 1) % steps.length] || 1.0;
     document.getElementById('btn-speed').textContent = ttsRate.toFixed(1) + '×';
-    showBubble('語速：' + ttsRate.toFixed(1) + '×');
+    showBubble('話す速度：' + ttsRate.toFixed(1) + '×');
   };
   document.getElementById('btn-llm').onclick = async () => {
     const btn = document.getElementById('btn-llm');
-    if (!window.LLM || !window.LLM.supported) { showBubble('這個裝置不支援 WebGPU，先用知識庫模式就好（功能一樣可用）。'); return; }
-    if (window.LLM.state === 'ready')   { showBubble('AI 大腦已啟用，問我問題吧 🧠'); return; }
-    if (window.LLM.state === 'loading') { showBubble('AI 大腦載入中… ' + Math.round(window.LLM.progress * 100) + '%'); return; }
-    showBubble('開始下載 AI 大腦（約 1GB，只需第一次）…');
+    if (!window.LLM || !window.LLM.supported) { showBubble('この端末はWebGPUに対応していません。'); return; }
+    if (window.LLM.state === 'ready')   { showBubble('AI大腦は既に起動しています 🧠'); return; }
+    if (window.LLM.state === 'loading') { showBubble('AI大腦を読み込み中… ' + Math.round(window.LLM.progress * 100) + '%'); return; }
+    showBubble('AI大腦のダウンロードを開始します（約1GB、初回のみ）…');
     try {
       await window.LLM.load((p) => { btn.textContent = '🧠 ' + Math.round((p.progress || 0) * 100) + '%'; });
       btn.textContent = '🧠✓'; btn.classList.add('llm-on');
-      speak('AI 大腦啟用完成，現在我可以聊得更自然囉！');
-    } catch (e) { btn.textContent = '🧠✗'; showBubble('AI 大腦載入失敗：' + (e && e.message || e)); }
+      speak('AI大腦の起動が完了したよ！日本語でお話ししようね！');
+    } catch (e) { btn.textContent = '🧠✗'; showBubble('起動に失敗しました：' + (e && e.message || e)); }
   };
 
-  // ===== 新增的打字輸入控制邏輯 =====
-  window.addEventListener('DOMContentLoaded', () => {
-    const textInput = document.getElementById('user-text-input');
-    const sendBtn = document.getElementById('send-text-btn');
+  // 打字傳送邏輯
+  const textInput = document.getElementById('user-text-input');
+  const sendBtn = document.getElementById('send-text-btn');
 
-    if (textInput && sendBtn) {
-        function handleTextSubmit() {
-            const text = textInput.value.trim();
-            if (text !== "") { 
-                handleUser(text); // 連接到正確的問答流程
-                textInput.value = ""; 
-            }
-        }
-        sendBtn.addEventListener('click', handleTextSubmit);
-        textInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                handleTextSubmit();
-            }
-        });
-    }
-  });
+  if (textInput && sendBtn) {
+      function handleTextSubmit() {
+          const text = textInput.value.trim();
+          if (text !== "") { 
+              handleUser(text); 
+              textInput.value = ""; 
+          }
+      }
+      sendBtn.addEventListener('click', handleTextSubmit);
+      textInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+              handleTextSubmit();
+          }
+      });
+  }
   </script>
 </body>
 </html>
