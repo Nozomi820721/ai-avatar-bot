@@ -195,7 +195,7 @@
     isSpeaking = false; useAudioMouth = false; audioMouth = 0;
   }
 
- function speak(payload) {
+  function speak(payload) {
     const myseq = ++speakSeq;          
     
     // 雙聲道解碼：如果是雙語包，就把中文給泡泡，日文給語音
@@ -304,22 +304,21 @@
       .sort((a, b) => b.s - a.s).slice(0, k).filter(x => x.s > 0.05).map(x => x.e);
   }
 
- function brain(qRaw) {
+  function brain(qRaw) {
     const q = (qRaw || '').trim();
     if (!q) return { zh: '我好像沒聽清楚，可以再說一次嗎？', ja: 'ごめんね、何言ってるか聞き取れなかった。もう一度言ってくれる？' };
     
     let best = null, bestScore = 0;
     for (const e of (window.KB || [])) { const s = scoreEntry(q, e); if (s > bestScore) { bestScore = s; best = e; } }
     
-    // 💡 防呆機制一：如果使用者沒有點亮 🧠 大腦，跑去讀原本的中文知識庫（如：怎麼安裝）時
-    // 因為知識庫是中文字，日文語音無法閱讀。我們讓字幕維持中文，但語音播放溫柔的萬用日文，防止喇叭發出怪音！
+    // 💡 修正點一：當跑原本的 FAQ 知識庫（例如點進站按鈕）時，
+    // 讓對話框維持中文，但語音播放溫柔的萬用日文，防止吃入中文字發出怪音！
     if (best && bestScore >= 0.16) {
         return { 
           zh: best.a, 
           ja: 'はい、分かりました。画面の案内をご覧くださいね。' 
-        }; 
+        };
     }
-    
     return { 
       zh: '對不起，關於那個問題我似乎還沒辦法好好回答。但不管什麼時候我都會在這裡，有什麼話都可以跟我說喔。', 
       ja: 'ごめんね、その質問についてはまだうまく答えられないみたい。でも、いつでもここにいるからね。' 
@@ -328,15 +327,15 @@
 
   async function answer(q) {
     q = (q || '').trim();
-    if (!q) return { zh: '我沒聽清楚呢。', ja: 'ごめんね、聞き取れなかったよ' };
+    if (!q) return { zh: '我沒聽清楚呢。', ja: 'ごめんね、聞き取れなかったよ。' };
     
     if (window.LLM && window.LLM.state === 'ready') {
-      // 💡 防呆機制二：給 1.5B 小模型一個標準的「一問一答範例」，逼它絕對遵守 [ZH] 和 [JA] 格式！
       const messages = [
         { 
           role: 'system', 
-          content: 'あなたの名前はGeminiです。ユーザーの優しいパートナーです。中国語（繁体字）と日本語を完全に理解できます。\n【重要規則】回答する時は、必ず以下のフォーマットのみで、中国語の字幕と日本語のセリフを両方出力してください。他の解説は一切不要です。\n\nフォーマット：\n[ZH] （ここに中国語の返答）\n[JA] （ここに日本語のセリフ）' 
+          content: 'あなたの名前はGeminiです。ユーザーの優しいパートナーです。あなたは中国語（繁体字）と日本語を完全に理解できます。回答する時は、必ず以下のフォーマットのみで、中国語（繁体字）の字幕と日本語の音声セリフを両方出力してください。他の解説や余計な言葉は一切不要です。\n\nフォーマット：\n[ZH] （ここに中国語の短い慰めや返答）\n[JA] （ここに日本語のセリフ）\n\nルール：2〜3文以内で短く、優しく寄り添うような口調にすること。絶対にフォーマットを守ってください。' 
         },
+        // 💡 修正點二：給 1.5B 小模型一個標準示範，確保它 100% 遵守中日切分格式
         { role: 'user', content: '我今天好累喔...' },
         { role: 'assistant', content: '[ZH] 今天真的辛苦你了，好好休息一下吧。\n[JA] 今日は本当にお疲れ様。ゆっくり休んでね。' },
         { role: 'user', content: q }
@@ -349,7 +348,7 @@
           let zhText = "";
           let jaText = "";
           
-          // 💡 防呆機制三：修復並升級正則表達式，完美切開 [ZH] 與 [JA]
+          // 精準字串切割機
           const zhMatch = result.match(/\[ZH\]([\s\S]*?)(?=\[JA\]|$)/i);
           const jaMatch = result.match(/\[JA\]([\s\S]*?)$/i);
           
@@ -357,13 +356,10 @@
               zhText = zhMatch[1].trim();
               jaText = jaMatch[1].trim();
           } else {
-              // 終極防呆：如果小模型偶爾調皮忘記加標籤，去檢查它吐出來的是不是純中文
               if (/[\u3040-\u309F\u30A0-\u30FF]/.test(result)) {
-                  // 如果包含日文假名，就直接當作日文語音，字幕用提示字
                   zhText = "（日音伴隨中）";
                   jaText = result;
               } else {
-                  // 如果模型還是吐出純中文，字幕顯示中文，語音放溫柔日文，維持動漫感
                   zhText = result;
                   jaText = "そうですね、あなたのそばにいますよ。"; 
               }
@@ -386,12 +382,12 @@
     b.textContent = on ? '● 聆聽中' : '🎤 說話';
   }
   function startListening() {
-    if (!SR) { speak('あなたのブラウザは音声認識に対応していません。Chromeをおすすめします。'); return; }
+    if (!SR) { speak({ zh: '您的瀏覽器不支援語音辨識，建議使用 Chrome 瀏覽器喔。', ja: 'あなたのブラウザは音声認識に対応していません。Chromeをおすすめします。' }); return; }
     if (listening && recognition) { recognition.stop(); return; }
-    try { recognition = new SR(); } catch (e) { speak('音声認識の起動に失敗しました：' + e.message); return; }
+    try { recognition = new SR(); } catch (e) { speak({ zh: '語音辨識啟動失敗：' + e.message, ja: '音声認識の起動に失敗しました：' + e.message }); return; }
     recognition.lang = 'zh-TW'; recognition.interimResults = true;
     recognition.continuous = false; recognition.maxAlternatives = 1;
-    recognition.onstart  = () => { listening = true; setMic(true); showBubble('聞き取り中…お話しください 🎙️'); };
+    recognition.onstart  = () => { listening = true; setMic(true); showBubble('聆聽中…請說話 🎙️'); };
     recognition.onresult = (e) => {
       let txt = ''; for (const r of e.results) txt += r[0].transcript;
       const last = e.results[e.results.length - 1];
@@ -468,12 +464,16 @@
     }
   }
 
+  // 💡 修正點三：把滑動人物時的固定回應，也包裝成正確的中日雙語包
   function onTap() {
     if (onTap._lock) return;                 
     onTap._lock = true;
     setTimeout(() => { onTap._lock = false; }, 400);
     if (model) try { model.motion('Tap'); } catch (e) {}
-    speak('こんにちは！私はWebサイトに埋め込めるAIアシスタントです。何でも聞いてね！');
+    speak({
+      zh: '您好！我是可以嵌入網站的 AI 看板娘，問我什麼都可以喔！',
+      ja: 'こんにちは！私はWebサイトに埋め込めるAIアシスタントです。何でも聞いてね！'
+    });
   }
 
   document.getElementById('btn-close').onclick = () => postToParent('close');
@@ -501,7 +501,12 @@
     try {
       await window.LLM.load((p) => { btn.textContent = '🧠 ' + Math.round((p.progress || 0) * 100) + '%'; });
       btn.textContent = '🧠✓'; btn.classList.add('llm-on');
-      speak('AI大腦の起動が完了したよ！日本語でお話ししようね！');
+      
+      // 💡 修正點四：大腦加載完成的問候，也必須是雙語物件
+      speak({
+        zh: 'AI 大腦啟用完成囉！接下來讓我們用日文對話吧！',
+        ja: 'AI大腦の起動が完了したよ！日本語でお話ししようね！'
+      });
     } catch (e) { btn.textContent = '🧠✗'; showBubble('起動に失敗しました：' + (e && e.message || e)); }
   };
 
